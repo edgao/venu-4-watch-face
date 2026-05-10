@@ -76,8 +76,9 @@ class face1View extends WatchUi.WatchFace {
 
         var bottomLeftLabel = View.findDrawableById("DataBottomLeft") as Text;
         var stressStr;
-        if (info.stressScore != null) {
-            stressStr = info.stressScore.format("%d");
+        var stress = SensorHistory.getStressHistory(historyQuery).next();
+        if (isHistorySampleFresh(stress, now)) {
+            stressStr = stress.data.format("%d");
         } else {
             stressStr = "--";
         }
