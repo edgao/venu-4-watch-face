@@ -5,6 +5,7 @@ import Toybox.WatchUi;
 
 using Toybox.Time;
 using Toybox.SensorHistory;
+using Toybox.Weather;
 
 class face1View extends WatchUi.WatchFace {
     var historyQuery = {
@@ -34,6 +35,17 @@ class face1View extends WatchUi.WatchFace {
         var stats = System.getSystemStats();
         var info = ActivityMonitor.getInfo();
         var date = Time.Gregorian.info(now, Time.FORMAT_MEDIUM);
+
+        var temperatureLabel = View.findDrawableById("Temperature") as Text;
+        var temperature = Weather.getCurrentConditions().temperature;
+        var temperatureStr;
+        if (temperature != null) {
+            // temperature is in celsius; convert to fahrenheit
+            temperatureStr = (temperature * 1.8 + 32).format("%d") + "°";
+        } else {
+            temperatureStr = "--";
+        }
+        temperatureLabel.setText(temperatureStr);
 
         var timeString = Lang.format("$1$:$2$", [date.hour, date.min.format("%02d")]);
         var timeLabel = View.findDrawableById("TimeLabel") as Text;
@@ -102,7 +114,10 @@ class face1View extends WatchUi.WatchFace {
     function onEnterSleep() as Void {
     }
 
-    private function isHistorySampleFresh(sample as SensorHistory.SensorSample, now as Time.Moment) {
+    private function isHistorySampleFresh(sample as SensorHistory.SensorSample?, now as Time.Moment) as Boolean {
+        if (sample == null) {
+            return false;
+        }
         return sample.when.add(historyFreshnessThreshold).greaterThan(now);
     }
 
