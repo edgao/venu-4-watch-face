@@ -2,9 +2,16 @@ import Toybox.Graphics;
 import Toybox.Lang;
 import Toybox.System;
 import Toybox.WatchUi;
-using Toybox.Time.Gregorian;
+
+using Toybox.Time;
+using Toybox.SensorHistory;
 
 class face1View extends WatchUi.WatchFace {
+    var historyQuery = {
+            :period => 1,
+            :order => SensorHistory.ORDER_NEWEST_FIRST
+        };
+    var historyFreshnessThreshold = new Time.Duration(60);
 
     function initialize() {
         WatchFace.initialize();
@@ -23,8 +30,10 @@ class face1View extends WatchUi.WatchFace {
 
     // Update the view
     function onUpdate(dc as Dc) as Void {
+        var now = Time.now();
         var stats = System.getSystemStats();
-        var date = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
+        var info = ActivityMonitor.getInfo();
+        var date = Time.Gregorian.info(now, Time.FORMAT_MEDIUM);
 
         var timeString = Lang.format("$1$:$2$", [date.hour, date.min.format("%02d")]);
         var timeLabel = View.findDrawableById("TimeLabel") as Text;
@@ -35,16 +44,42 @@ class face1View extends WatchUi.WatchFace {
         dateLabel.setText(dateString);
 
         var topLeftLabel = View.findDrawableById("DataTopLeft") as Text;
-        topLeftLabel.setText("asdf");
+        var heartRate = SensorHistory.getHeartRateHistory(historyQuery).next();
+        var heartRateStr;
+        if (isHistorySampleFresh(heartRate, now)) {
+            heartRateStr = heartRate.data.format("%d");
+        } else {
+            heartRateStr = "--";
+        }
+        topLeftLabel.setText(heartRateStr);
 
         var topRightLabel = View.findDrawableById("DataTopRight") as Text;
-        topRightLabel.setText("qwer");
+        var stepsStr;
+        if (info.steps != null) {
+            stepsStr = info.steps.format("%d");
+        } else {
+            stepsStr = "--";
+        }
+        topRightLabel.setText(stepsStr);
 
         var bottomLeftLabel = View.findDrawableById("DataBottomLeft") as Text;
-        bottomLeftLabel.setText("zxcv");
+        var stressStr;
+        if (info.stressScore != null) {
+            stressStr = info.stressScore.format("%d");
+        } else {
+            stressStr = "--";
+        }
+        bottomLeftLabel.setText(stressStr);
 
         var bottomRightLabel = View.findDrawableById("DataBottomRight") as Text;
-        bottomRightLabel.setText("jk;l");
+        var bodyBattery = SensorHistory.getBodyBatteryHistory(historyQuery).next();
+        var bodyBatteryStr;
+        if (isHistorySampleFresh(bodyBattery, now)) {
+            bodyBatteryStr = bodyBattery.data.format("%d");
+        } else {
+            bodyBatteryStr = "--";
+        }
+        bottomRightLabel.setText(bodyBatteryStr);
 
         var batteryLabel = View.findDrawableById("Battery") as Text;
         batteryLabel.setText(Math.round(stats.battery).format("%02d") + "%");
@@ -65,6 +100,10 @@ class face1View extends WatchUi.WatchFace {
 
     // Terminate any active timers and prepare for slow updates.
     function onEnterSleep() as Void {
+    }
+
+    private function isHistorySampleFresh(sample as SensorHistory.SensorSample, now as Time.Moment) {
+        return sample.when.add(historyFreshnessThreshold).greaterThan(now);
     }
 
 }
