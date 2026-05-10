@@ -14,6 +14,13 @@ class face1View extends WatchUi.WatchFace {
         };
     var historyFreshnessThreshold = new Time.Duration(60);
 
+    var temperatureLabel;
+    var heartrateLabel;
+    var stepsLabel;
+    var stressLabel;
+    var bodyBatteryLabel;
+    var batteryLabel;
+
     function initialize() {
         WatchFace.initialize();
     }
@@ -21,6 +28,13 @@ class face1View extends WatchUi.WatchFace {
     // Load your resources here
     function onLayout(dc as Dc) as Void {
         setLayout(Rez.Layouts.WatchFace(dc));
+
+        temperatureLabel = View.findDrawableById("Temperature") as Text;
+        heartrateLabel = View.findDrawableById("HeartRate") as Text;
+        stepsLabel = View.findDrawableById("Steps") as Text;
+        stressLabel = View.findDrawableById("Stress") as Text;
+        bodyBatteryLabel = View.findDrawableById("BodyBattery") as Text;
+        batteryLabel = View.findDrawableById("Battery") as Text;
     }
 
     // Called when this View is brought to the foreground. Restore
@@ -36,7 +50,6 @@ class face1View extends WatchUi.WatchFace {
         var info = ActivityMonitor.getInfo();
         var date = Time.Gregorian.info(now, Time.FORMAT_MEDIUM);
 
-        var temperatureLabel = View.findDrawableById("Temperature") as Text;
         var temperature = Weather.getCurrentConditions().temperature;
         var temperatureStr;
         if (temperature != null) {
@@ -55,7 +68,6 @@ class face1View extends WatchUi.WatchFace {
         var dateString = Lang.format("$1$ $2$ $3$", [date.day_of_week, date.month, date.day.format("%02d")]);
         dateLabel.setText(dateString);
 
-        var topLeftLabel = View.findDrawableById("DataTopLeft") as Text;
         var heartRate = SensorHistory.getHeartRateHistory(historyQuery).next();
         var heartRateStr;
         if (isHistorySampleFresh(heartRate, now)) {
@@ -63,18 +75,16 @@ class face1View extends WatchUi.WatchFace {
         } else {
             heartRateStr = "--";
         }
-        topLeftLabel.setText(heartRateStr);
+        heartrateLabel.setText(heartRateStr);
 
-        var topRightLabel = View.findDrawableById("DataTopRight") as Text;
         var stepsStr;
         if (info.steps != null) {
             stepsStr = info.steps.format("%d");
         } else {
             stepsStr = "--";
         }
-        topRightLabel.setText(stepsStr);
+        stepsLabel.setText(stepsStr);
 
-        var bottomLeftLabel = View.findDrawableById("DataBottomLeft") as Text;
         var stressStr;
         var stress = SensorHistory.getStressHistory(historyQuery).next();
         if (isHistorySampleFresh(stress, now)) {
@@ -82,9 +92,8 @@ class face1View extends WatchUi.WatchFace {
         } else {
             stressStr = "--";
         }
-        bottomLeftLabel.setText(stressStr);
+        stressLabel.setText(stressStr);
 
-        var bottomRightLabel = View.findDrawableById("DataBottomRight") as Text;
         var bodyBattery = SensorHistory.getBodyBatteryHistory(historyQuery).next();
         var bodyBatteryStr;
         if (isHistorySampleFresh(bodyBattery, now)) {
@@ -92,9 +101,8 @@ class face1View extends WatchUi.WatchFace {
         } else {
             bodyBatteryStr = "--";
         }
-        bottomRightLabel.setText(bodyBatteryStr);
+        bodyBatteryLabel.setText(bodyBatteryStr);
 
-        var batteryLabel = View.findDrawableById("Battery") as Text;
         batteryLabel.setText(Math.round(stats.battery).format("%02d") + "%");
 
         // Call the parent onUpdate function to redraw the layout
