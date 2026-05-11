@@ -3,6 +3,7 @@ import Toybox.Lang;
 import Toybox.System;
 import Toybox.WatchUi;
 
+using Toybox.Complications;
 using Toybox.Time;
 using Toybox.SensorHistory;
 using Toybox.Weather;
@@ -14,7 +15,12 @@ class face1View extends WatchUi.WatchFace {
         };
     var historyFreshnessThreshold = new Time.Duration(60);
 
+    var width;
+    var height;
+
     var temperatureLabel;
+    var dateLabel;
+    var timeLabel;
     var heartrateLabel;
     var stepsLabel;
     var stressLabel;
@@ -29,7 +35,12 @@ class face1View extends WatchUi.WatchFace {
     function onLayout(dc as Dc) as Void {
         setLayout(Rez.Layouts.WatchFace(dc));
 
+        width = dc.getWidth();
+        height = dc.getHeight();
+
         temperatureLabel = View.findDrawableById("Temperature") as Text;
+        dateLabel = View.findDrawableById("Date") as Text;
+        timeLabel = View.findDrawableById("TimeLabel") as Text;
         heartrateLabel = View.findDrawableById("HeartRate") as Text;
         stepsLabel = View.findDrawableById("Steps") as Text;
         stressLabel = View.findDrawableById("Stress") as Text;
@@ -60,13 +71,11 @@ class face1View extends WatchUi.WatchFace {
         }
         temperatureLabel.setText(temperatureStr);
 
-        var timeString = Lang.format("$1$:$2$", [date.hour, date.min.format("%02d")]);
-        var timeLabel = View.findDrawableById("TimeLabel") as Text;
-        timeLabel.setText(timeString);
-
-        var dateLabel = View.findDrawableById("Date") as Text;
         var dateString = Lang.format("$1$ $2$ $3$", [date.day_of_week, date.month, date.day.format("%02d")]);
         dateLabel.setText(dateString);
+
+        var timeString = Lang.format("$1$:$2$", [date.hour, date.min.format("%02d")]);
+        timeLabel.setText(timeString);
 
         var heartRate = SensorHistory.getHeartRateHistory(historyQuery).next();
         var heartRateStr;
@@ -123,11 +132,94 @@ class face1View extends WatchUi.WatchFace {
     function onEnterSleep() as Void {
     }
 
+    function getClickTarget(coord as [Number, Number]) as Complications.Type? {
+        // hardcode justifications :/
+        // doesn't seem like we can access this from the label instance
+        if (isInsideLabel(coord, heartrateLabel, Graphics.TEXT_JUSTIFY_RIGHT)) {
+            return Complications.COMPLICATION_TYPE_HEART_RATE;
+        }
+        if (isInsideLabel(coord, stressLabel, Graphics.TEXT_JUSTIFY_RIGHT)) {
+            return Complications.COMPLICATION_TYPE_STRESS;
+        }
+        if (isInsideLabel(coord, stepsLabel, Graphics.TEXT_JUSTIFY_LEFT)) {
+            return Complications.COMPLICATION_TYPE_STEPS;
+        }
+        if (isInsideLabel(coord, bodyBatteryLabel, Graphics.TEXT_JUSTIFY_LEFT)) {
+            return Complications.COMPLICATION_TYPE_BODY_BATTERY;
+        }
+        if (isInsideLabel(coord, batteryLabel, Graphics.TEXT_JUSTIFY_CENTER)) {
+            return Complications.COMPLICATION_TYPE_BATTERY;
+        }
+        if (isInsideLabel(coord, temperatureLabel, Graphics.TEXT_JUSTIFY_CENTER)) {
+            return Complications.COMPLICATION_TYPE_CURRENT_WEATHER;
+        }
+        if (
+            isInsideLabel(coord, dateLabel, Graphics.TEXT_JUSTIFY_CENTER) ||
+            isInsideLabel(coord, timeLabel, Graphics.TEXT_JUSTIFY_CENTER)
+        ) {
+            return Complications.COMPLICATION_TYPE_DATE;
+        }
+        return null;
+    }
+
     private function isHistorySampleFresh(sample as SensorHistory.SensorSample?, now as Time.Moment) as Boolean {
         if (sample == null) {
             return false;
         }
         return sample.when.add(historyFreshnessThreshold).greaterThan(now);
+    }
+
+    private function isInsideLabel(
+        coord as [Number, Number],
+        label as Text,
+        justification as TextJustification
+    ) as Boolean {
+        var minX = label.locX;
+        var minY = label.locY;
+        var width = label.width;
+        switch (justification) {
+            case Graphics.TEXT_JUSTIFY_RIGHT: {
+                minX = 0;
+                width = self.width / 2;
+                break;
+            }
+            case Graphics.TEXT_JUSTIFY_VCENTER: {
+                minY = label.locY - label.height / 2;
+                // fallthrough to CENTER case
+            }
+            case Graphics.TEXT_JUSTIFY_CENTER: {
+                minX = 0;
+                width = self.width;
+                break;
+            }
+            case Graphics.TEXT_JUSTIFY_LEFT: {
+                minX = self.width / 2;
+                width = self.width / 2;
+                break;
+            }
+            default: {
+                throw new InvalidValueException("Unexpected justification value: " + justification);
+            }
+        }
+        return isInside(
+            coord,
+            minX,
+            minY,
+            width,
+            label.height
+        );
+    }
+
+    private function isInside(
+        coord as [Number, Number],
+        xmin as Number,
+        ymin as Number,
+        width as Number,
+        height as Number
+    ) as Boolean {
+        var x = coord[0];
+        var y = coord[1];
+        return xmin <= x && x <= xmin + width && ymin <= y && y <= ymin + height;
     }
 
 }

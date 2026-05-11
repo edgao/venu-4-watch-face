@@ -18,7 +18,8 @@ class face1App extends Application.AppBase {
 
     // Return the initial view of your application here
     function getInitialView() as [Views] or [Views, InputDelegates] {
-        return [ new face1View() ];
+        var view = new face1View();
+        return [ view, new InputDelegate(view) ];
     }
 
 }
