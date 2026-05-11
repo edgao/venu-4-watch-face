@@ -153,17 +153,11 @@ class face1View extends WatchUi.WatchFace {
         if (isInsideLabel(coord, temperatureLabel, Graphics.TEXT_JUSTIFY_CENTER)) {
             return Complications.COMPLICATION_TYPE_CURRENT_WEATHER;
         }
-        if (
-            isInsideLabel(coord, dateLabel, Graphics.TEXT_JUSTIFY_CENTER) ||
-            isInsideLabel(coord, timeLabel, Graphics.TEXT_JUSTIFY_CENTER)
-        ) {
-            return Complications.COMPLICATION_TYPE_DATE;
-        }
         return null;
     }
 
     private function isHistorySampleFresh(sample as SensorHistory.SensorSample?, now as Time.Moment) as Boolean {
-        if (sample == null) {
+        if (sample == null || sample.data == null) {
             return false;
         }
         return sample.when.add(historyFreshnessThreshold).greaterThan(now);

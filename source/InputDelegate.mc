@@ -19,8 +19,7 @@ class InputDelegate extends WatchUi.WatchFaceDelegate {
             System.println("no trigger");
             return false;
         }
-        System.println("triggered " + Complications.getComplication(new Complications.Id(clickTarget)).longLabel);
-        // Complications.exitTo(new Complications.Id(clickTarget));
+        Complications.exitTo(new Complications.Id(clickTarget));
         return true;
     }
 }
