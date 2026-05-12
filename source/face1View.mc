@@ -20,7 +20,6 @@ class face1View extends WatchUi.WatchFace {
     var width;
     var height;
 
-    var temperatureLabel;
     var dateLabel;
     var timeLabel;
     var heartrateLabel;
@@ -42,7 +41,6 @@ class face1View extends WatchUi.WatchFace {
         width = dc.getWidth();
         height = dc.getHeight();
 
-        temperatureLabel = View.findDrawableById("Temperature") as Text;
         dateLabel = View.findDrawableById("Date") as Text;
         timeLabel = View.findDrawableById("TimeLabel") as Text;
         heartrateLabel = View.findDrawableById("HeartRate") as Text;
@@ -64,16 +62,6 @@ class face1View extends WatchUi.WatchFace {
         var stats = System.getSystemStats();
         var info = ActivityMonitor.getInfo();
         var date = Time.Gregorian.info(now, Time.FORMAT_MEDIUM);
-
-        var temperature = Weather.getCurrentConditions().temperature;
-        var temperatureStr;
-        if (temperature != null) {
-            // temperature is in celsius; convert to fahrenheit
-            temperatureStr = (temperature * 1.8 + 32).format("%d") + "°";
-        } else {
-            temperatureStr = "--";
-        }
-        temperatureLabel.setText(temperatureStr);
 
         var dateString = Lang.format("$1$ $2$ $3$", [date.day_of_week, date.month, date.day.format("%02d")]);
         dateLabel.setText(dateString);
@@ -138,7 +126,7 @@ class face1View extends WatchUi.WatchFace {
         );
         dc.drawScaledBitmap(
             width * 0.43,
-            height * 0.74,
+            height * 0.76,
             width * 0.05,
             height * 0.05,
             // TODO stress icon
@@ -146,7 +134,7 @@ class face1View extends WatchUi.WatchFace {
         );
         dc.drawScaledBitmap(
             width * 0.53,
-            height * 0.74,
+            height * 0.76,
             width * 0.05,
             height * 0.05,
             // TODO body battery icon
@@ -185,9 +173,6 @@ class face1View extends WatchUi.WatchFace {
         }
         if (isInsideLabel(coord, batteryLabel, Graphics.TEXT_JUSTIFY_CENTER)) {
             return Complications.COMPLICATION_TYPE_BATTERY;
-        }
-        if (isInsideLabel(coord, temperatureLabel, Graphics.TEXT_JUSTIFY_CENTER)) {
-            return Complications.COMPLICATION_TYPE_CURRENT_WEATHER;
         }
         return null;
     }
