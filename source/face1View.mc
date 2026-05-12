@@ -16,6 +16,7 @@ class face1View extends WatchUi.WatchFace {
     var historyFreshnessThreshold = new Time.Duration(60);
 
     var heartIcon;
+    var footIcon;
 
     var width;
     var height;
@@ -37,6 +38,7 @@ class face1View extends WatchUi.WatchFace {
         setLayout(Rez.Layouts.WatchFace(dc));
 
         heartIcon = WatchUi.loadResource(Rez.Drawables.HeartIcon);
+        footIcon = WatchUi.loadResource(Rez.Drawables.FootIcon);
 
         width = dc.getWidth();
         height = dc.getHeight();
@@ -121,8 +123,7 @@ class face1View extends WatchUi.WatchFace {
             height * 0.59,
             width * 0.05,
             height * 0.05,
-            // TODO steps icon
-            heartIcon
+            footIcon
         );
         dc.drawScaledBitmap(
             width * 0.43,
