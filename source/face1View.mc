@@ -15,9 +15,6 @@ class face1View extends WatchUi.WatchFace {
         };
     var historyFreshnessThreshold = new Time.Duration(60);
 
-    var heartIcon;
-    var footIcon;
-
     var width;
     var height;
 
@@ -36,9 +33,6 @@ class face1View extends WatchUi.WatchFace {
     // Load your resources here
     function onLayout(dc as Dc) as Void {
         setLayout(Rez.Layouts.WatchFace(dc));
-
-        heartIcon = WatchUi.loadResource(Rez.Drawables.HeartIcon);
-        footIcon = WatchUi.loadResource(Rez.Drawables.FootIcon);
 
         width = dc.getWidth();
         height = dc.getHeight();
@@ -110,37 +104,6 @@ class face1View extends WatchUi.WatchFace {
 
         // Call the parent onUpdate function to redraw the layout
         View.onUpdate(dc);
-
-        dc.drawScaledBitmap(
-            width * 0.43,
-            height * 0.59,
-            width * 0.05,
-            height * 0.05,
-            heartIcon
-        );
-        dc.drawScaledBitmap(
-            width * 0.53,
-            height * 0.59,
-            width * 0.05,
-            height * 0.05,
-            footIcon
-        );
-        dc.drawScaledBitmap(
-            width * 0.43,
-            height * 0.76,
-            width * 0.05,
-            height * 0.05,
-            // TODO stress icon
-            heartIcon
-        );
-        dc.drawScaledBitmap(
-            width * 0.53,
-            height * 0.76,
-            width * 0.05,
-            height * 0.05,
-            // TODO body battery icon
-            heartIcon
-        );
     }
 
     // Called when this View is removed from the screen. Save the
