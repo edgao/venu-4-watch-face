@@ -3,7 +3,6 @@
     <label id="Date" x="center" y="12%" font="Graphics.FONT_MEDIUM" justification="Graphics.TEXT_JUSTIFY_CENTER" color="Graphics.COLOR_WHITE" />
     <label id="TimeLabel" x="center" y="18%" font="Graphics.FONT_NUMBER_THAI_HOT" justification="Graphics.TEXT_JUSTIFY_CENTER" color="Graphics.COLOR_WHITE" />
     <label id="HeartRate" x="40%" y="55%" font="Graphics.FONT_MEDIUM" justification="Graphics.TEXT_JUSTIFY_RIGHT" color="Graphics.COLOR_WHITE" />
-    <bitmap id="HeartIcon" filename="../drawables/heart.png" x="45%" y="55%"/>
     <label id="Steps" x="60%" y="55%" font="Graphics.FONT_MEDIUM" justification="Graphics.TEXT_JUSTIFY_LEFT" color="Graphics.COLOR_WHITE" />
     <label id="Stress" x="40%" y="70%" font="Graphics.FONT_MEDIUM" justification="Graphics.TEXT_JUSTIFY_RIGHT" color="Graphics.COLOR_WHITE" />
     <label id="BodyBattery" x="60%" y="70%" font="Graphics.FONT_MEDIUM" justification="Graphics.TEXT_JUSTIFY_LEFT" color="Graphics.COLOR_WHITE" />
