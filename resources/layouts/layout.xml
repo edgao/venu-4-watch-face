@@ -3,10 +3,8 @@
     <label id="TimeLabel" x="center" y="16%" font="Graphics.FONT_NUMBER_THAI_HOT" justification="Graphics.TEXT_JUSTIFY_CENTER" color="Graphics.COLOR_WHITE" />
     <bitmap id="HeartIcon" filename="../drawables/heart.png" dithering="none" x="43%" y="59%" scaleX="5%" />
     <bitmap id="FootIcon" filename="../drawables/foot.png" dithering="none" x="53%" y="59%" scaleX="5%" />
-    <!-- TODO -->
-    <bitmap id="StressIcon" filename="../drawables/heart.png" dithering="none" x="43%" y="75%" scaleX="5%" />
-    <!-- TODO -->
-    <bitmap id="BodyBatteryIcon" filename="../drawables/heart.png" dithering="none" x="53%" y="75%" scaleX="5%" />
+    <bitmap id="StressIcon" filename="../drawables/stress.png" dithering="none" x="43%" y="75%" scaleX="5%" />
+    <bitmap id="BodyBatteryIcon" filename="../drawables/bodybattery.png" dithering="none" x="53%" y="75%" scaleX="5%" />
     <label id="HeartRate" x="40%" y="55%" font="Graphics.FONT_MEDIUM" justification="Graphics.TEXT_JUSTIFY_RIGHT" color="Graphics.COLOR_WHITE" />
     <label id="Steps" x="60%" y="55%" font="Graphics.FONT_MEDIUM" justification="Graphics.TEXT_JUSTIFY_LEFT" color="Graphics.COLOR_WHITE" />
     <label id="Stress" x="40%" y="71%" font="Graphics.FONT_MEDIUM" justification="Graphics.TEXT_JUSTIFY_RIGHT" color="Graphics.COLOR_WHITE" />
