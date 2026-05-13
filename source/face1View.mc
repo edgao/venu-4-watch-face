@@ -13,7 +13,7 @@ class face1View extends WatchUi.WatchFace {
             :period => 1,
             :order => SensorHistory.ORDER_NEWEST_FIRST
         };
-    var historyFreshnessThreshold = new Time.Duration(60);
+    var historyFreshnessThreshold = new Time.Duration(5);
 
     var width;
     var height;
@@ -66,13 +66,7 @@ class face1View extends WatchUi.WatchFace {
         timeLabel.setText(timeString);
 
         var heartRate = SensorHistory.getHeartRateHistory(historyQuery).next();
-        var heartRateStr;
-        if (isHistorySampleFresh(heartRate, now)) {
-            heartRateStr = heartRate.data.format("%d");
-        } else {
-            heartRateStr = "--";
-        }
-        heartrateLabel.setText(heartRateStr);
+        heartrateLabel.setText(historySampleToString(heartRate, now));
 
         var stepsStr;
         if (info.steps != null) {
@@ -82,23 +76,11 @@ class face1View extends WatchUi.WatchFace {
         }
         stepsLabel.setText(stepsStr);
 
-        var stressStr;
         var stress = SensorHistory.getStressHistory(historyQuery).next();
-        if (isHistorySampleFresh(stress, now)) {
-            stressStr = stress.data.format("%d");
-        } else {
-            stressStr = "--";
-        }
-        stressLabel.setText(stressStr);
+        stressLabel.setText(historySampleToString(stress, now));
 
         var bodyBattery = SensorHistory.getBodyBatteryHistory(historyQuery).next();
-        var bodyBatteryStr;
-        if (isHistorySampleFresh(bodyBattery, now)) {
-            bodyBatteryStr = bodyBattery.data.format("%d");
-        } else {
-            bodyBatteryStr = "--";
-        }
-        bodyBatteryLabel.setText(bodyBatteryStr);
+        bodyBatteryLabel.setText(historySampleToString(bodyBattery, now));
 
         batteryLabel.setText(Math.round(stats.battery).format("%02d") + "%");
 
@@ -146,6 +128,34 @@ class face1View extends WatchUi.WatchFace {
             return false;
         }
         return sample.when.add(historyFreshnessThreshold).greaterThan(now);
+    }
+
+    private function historySampleToString(sample as SensorHistory.SensorSample?, now as Time.Moment) as String {
+        if (sample == null) {
+            return "--";
+        }
+        if (sample.data == null) {
+            return "--";
+        }
+        if (sample.when.add(historyFreshnessThreshold).greaterThan(now)) {
+            return sample.data.format("%d");
+        }
+        return historySampleAgeToString(sample, now);
+    }
+
+    private function historySampleAgeToString(sample as SensorHistory.SensorSample?, now as Time.Moment) as String {
+        var age = now.subtract(sample.when);
+        return Lang.format("-$1$", [secondsToString(age.value())]);
+    }
+
+    private function secondsToString(seconds as Numeric) as String {
+        if (seconds < 60) {
+            return seconds + "s";
+        } else if (seconds < 3600) {
+            return Math.round(seconds / 60.0).format("%.0d") + "m";
+        } else {
+            return Math.round(seconds / 3600.0).format("%.0d") + "h";
+        }
     }
 
     private function isInsideLabel(
