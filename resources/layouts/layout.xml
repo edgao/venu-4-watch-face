@@ -10,4 +10,5 @@
     <label id="Stress" x="40%" y="71%" font="Graphics.FONT_MEDIUM" justification="Graphics.TEXT_JUSTIFY_RIGHT" color="Graphics.COLOR_WHITE" />
     <label id="BodyBattery" x="60%" y="71%" font="Graphics.FONT_MEDIUM" justification="Graphics.TEXT_JUSTIFY_LEFT" color="Graphics.COLOR_WHITE" />
     <label id="Battery" x="center" y="90%" font="Graphics.FONT_TINY" justification="Graphics.TEXT_JUSTIFY_CENTER" color="Graphics.COLOR_WHITE" />
+    <bitmap id="NoBluetoothIcon" filename="../drawables/nobluetooth.png" dithering="none" x="62%" y="91.5%" scaleX="5.5%" />
 </layout>

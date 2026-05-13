@@ -25,6 +25,7 @@ class face1View extends WatchUi.WatchFace {
     var stressLabel;
     var bodyBatteryLabel;
     var batteryLabel;
+    var noBluetoothIcon;
 
     function initialize() {
         WatchFace.initialize();
@@ -44,6 +45,8 @@ class face1View extends WatchUi.WatchFace {
         stressLabel = View.findDrawableById("Stress") as Text;
         bodyBatteryLabel = View.findDrawableById("BodyBattery") as Text;
         batteryLabel = View.findDrawableById("Battery") as Text;
+
+        noBluetoothIcon = View.findDrawableById("NoBluetoothIcon") as Bitmap;
     }
 
     // Called when this View is brought to the foreground. Restore
@@ -55,8 +58,6 @@ class face1View extends WatchUi.WatchFace {
     // Update the view
     function onUpdate(dc as Dc) as Void {
         var now = Time.now();
-        var stats = System.getSystemStats();
-        var info = ActivityMonitor.getInfo();
         var date = Time.Gregorian.info(now, Time.FORMAT_MEDIUM);
 
         var dateString = Lang.format("$1$ $2$ $3$", [date.day_of_week, date.month, date.day.format("%02d")]);
@@ -68,6 +69,7 @@ class face1View extends WatchUi.WatchFace {
         var heartRate = SensorHistory.getHeartRateHistory(historyQuery).next();
         heartrateLabel.setText(historySampleToString(heartRate, now));
 
+        var info = ActivityMonitor.getInfo();
         var stepsStr;
         if (info.steps != null) {
             stepsStr = info.steps.format("%d");
@@ -82,7 +84,9 @@ class face1View extends WatchUi.WatchFace {
         var bodyBattery = SensorHistory.getBodyBatteryHistory(historyQuery).next();
         bodyBatteryLabel.setText(historySampleToString(bodyBattery, now));
 
-        batteryLabel.setText(Math.round(stats.battery).format("%02d") + "%");
+        batteryLabel.setText(Math.round(System.getSystemStats().battery).format("%02d") + "%");
+
+        noBluetoothIcon.setVisible(!System.getDeviceSettings().phoneConnected);
 
         // Call the parent onUpdate function to redraw the layout
         View.onUpdate(dc);
