@@ -111,21 +111,20 @@ class face1View extends WatchUi.WatchFace {
     }
 
     function getClickTarget(coord as [Number, Number]) as Complications.Type? {
-        // hardcode justifications :/
-        // doesn't seem like we can access this from the label instance
-        if (isInsideLabel(coord, heartrateLabel, Graphics.TEXT_JUSTIFY_RIGHT)) {
+        // hardcode positions. They're not strictly related to the label position/sizes.
+        if (isInside(coord, 0, height * 0.55, width * 0.5, height * 0.16)) {
             return Complications.COMPLICATION_TYPE_HEART_RATE;
         }
-        if (isInsideLabel(coord, stressLabel, Graphics.TEXT_JUSTIFY_RIGHT)) {
+        if (isInside(coord, width * 0.5, height * 0.55, width * 0.5, height * 0.16)) {
             return Complications.COMPLICATION_TYPE_STRESS;
         }
-        if (isInsideLabel(coord, stepsLabel, Graphics.TEXT_JUSTIFY_LEFT)) {
+        if (isInside(coord, 0, height * 0.71, width * 0.5, height * 0.16)) {
             return Complications.COMPLICATION_TYPE_STEPS;
         }
-        if (isInsideLabel(coord, bodyBatteryLabel, Graphics.TEXT_JUSTIFY_LEFT)) {
+        if (isInside(coord, width * 0.5, height * 0.71, width * 0.5, height * 0.16)) {
             return Complications.COMPLICATION_TYPE_BODY_BATTERY;
         }
-        if (isInsideLabel(coord, batteryLabel, Graphics.TEXT_JUSTIFY_CENTER)) {
+        if (isInside(coord, 0, height * 0.87, width, height * 0.13)) {
             return Complications.COMPLICATION_TYPE_BATTERY;
         }
         return null;
