@@ -10,7 +10,7 @@ Customized watch face for my own needs.
     * if <5s old, display normally
     * if <15s, display with `*` suffix
     * if <30s, display with `**`
-    * if <60s, display with `?`'
+    * if <60s, display with `?`
     * if >=60s, display with `??`
   * If historical sensor data also not available, display last-known value with `~`
 * notification icon
