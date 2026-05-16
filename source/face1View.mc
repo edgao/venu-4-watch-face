@@ -13,7 +13,10 @@ class face1View extends WatchUi.WatchFace {
             :period => 1,
             :order => SensorHistory.ORDER_NEWEST_FIRST
         };
-    var historyFreshnessThreshold = new Time.Duration(5);
+    var freshSampleThreshold = new Time.Duration(5);
+    var sampleThreshold1 = new Time.Duration(15);
+    var sampleThreshold2 = new Time.Duration(30);
+    var sampleThreshold3 = new Time.Duration(60);
 
     var width;
     var height;
@@ -27,6 +30,10 @@ class face1View extends WatchUi.WatchFace {
     var batteryLabel;
     var notificationIcon;
     var noBluetoothIcon;
+
+    var lastHeartRate;
+    var lastStress;
+    var lastBodyBattery;
 
     function initialize() {
         WatchFace.initialize();
@@ -61,6 +68,8 @@ class face1View extends WatchUi.WatchFace {
     function onUpdate(dc as Dc) as Void {
         var now = Time.now();
         var date = Time.Gregorian.info(now, Time.FORMAT_MEDIUM);
+        var activityInfo = Activity.getActivityInfo();
+        var activityMonitorInfo = ActivityMonitor.getInfo();
 
         var dateString = Lang.format("$1$ $2$ $3$", [date.day_of_week, date.month, date.day.format("%02d")]);
         dateLabel.setText(dateString);
@@ -68,23 +77,42 @@ class face1View extends WatchUi.WatchFace {
         var timeString = Lang.format("$1$:$2$", [date.hour, date.min.format("%02d")]);
         timeLabel.setText(timeString);
 
-        var heartRate = SensorHistory.getHeartRateHistory(historyQuery).next();
-        heartrateLabel.setText(historySampleToString(heartRate, now));
+        var liveHeartrate = activityInfo.currentHeartRate;
+        if (liveHeartrate != null) {
+            lastHeartRate = liveHeartrate;
+            heartrateLabel.setText(liveHeartrate.format("%d"));
+        } else {
+            var heartRate = SensorHistory.getHeartRateHistory(historyQuery).next();
+            if (heartRate != null && heartRate.data != null) {
+                lastHeartRate = heartRate.data;
+            }
+            heartrateLabel.setText(historySampleToString(heartRate, now, lastHeartRate));
+        }
 
-        var info = ActivityMonitor.getInfo();
         var stepsStr;
-        if (info.steps != null) {
-            stepsStr = info.steps.format("%d");
+        if (activityMonitorInfo.steps != null) {
+            stepsStr = activityMonitorInfo.steps.format("%d");
         } else {
             stepsStr = "--";
         }
         stepsLabel.setText(stepsStr);
 
-        var stress = SensorHistory.getStressHistory(historyQuery).next();
-        stressLabel.setText(historySampleToString(stress, now));
+        if (activityMonitorInfo.stressScore != null) {
+            lastStress = activityMonitorInfo.stressScore;
+            stressLabel.setText(activityMonitorInfo.stressScore.format("%d"));
+        } else {
+            var stress = SensorHistory.getStressHistory(historyQuery).next();
+            if (stress != null && stress.data != null) {
+                lastStress = stress.data;
+            }
+            stressLabel.setText(historySampleToString(stress, now, lastStress));
+        }
 
         var bodyBattery = SensorHistory.getBodyBatteryHistory(historyQuery).next();
-        bodyBatteryLabel.setText(historySampleToString(bodyBattery, now));
+        if (bodyBattery != null && bodyBattery.data != null) {
+            lastBodyBattery = bodyBattery.data;
+        }
+        bodyBatteryLabel.setText(historySampleToString(bodyBattery, now, lastBodyBattery));
 
         batteryLabel.setText(Math.round(System.getSystemStats().battery).format("%02d") + "%");
 
@@ -116,94 +144,43 @@ class face1View extends WatchUi.WatchFace {
             return Complications.COMPLICATION_TYPE_HEART_RATE;
         }
         if (isInside(coord, width * 0.5, height * 0.55, width * 0.5, height * 0.16)) {
-            return Complications.COMPLICATION_TYPE_STRESS;
+            return Complications.COMPLICATION_TYPE_STEPS;
         }
         if (isInside(coord, 0, height * 0.71, width * 0.5, height * 0.16)) {
-            return Complications.COMPLICATION_TYPE_STEPS;
+            return Complications.COMPLICATION_TYPE_STRESS;
         }
         if (isInside(coord, width * 0.5, height * 0.71, width * 0.5, height * 0.16)) {
             return Complications.COMPLICATION_TYPE_BODY_BATTERY;
         }
-        if (isInside(coord, 0, height * 0.87, width, height * 0.13)) {
-            return Complications.COMPLICATION_TYPE_BATTERY;
-        }
         return null;
     }
 
-    private function isHistorySampleFresh(sample as SensorHistory.SensorSample?, now as Time.Moment) as Boolean {
+    private function historySampleToString(sample as SensorHistory.SensorSample?, now as Time.Moment, lastKnownValue) as String {
         if (sample == null || sample.data == null) {
-            return false;
+            if (lastKnownValue != null) {
+                return lastKnownValue.format("%d") + "~";
+            } else {
+                return "--~";
+            }
         }
-        return sample.when.add(historyFreshnessThreshold).greaterThan(now);
-    }
-
-    private function historySampleToString(sample as SensorHistory.SensorSample?, now as Time.Moment) as String {
-        if (sample == null) {
-            return "--";
-        }
-        if (sample.data == null) {
-            return "--";
-        }
-        if (sample.when.add(historyFreshnessThreshold).greaterThan(now)) {
-            return sample.data.format("%d");
-        }
-        return historySampleAgeToString(sample, now);
+        return sample.data.format("%d") + historySampleAgeToString(sample, now);
     }
 
     private function historySampleAgeToString(sample as SensorHistory.SensorSample?, now as Time.Moment) as String {
-        var age = now.subtract(sample.when);
-        return Lang.format("-$1$", [secondsToString(age.value())]);
-    }
-
-    private function secondsToString(seconds as Numeric) as String {
-        if (seconds < 60) {
-            return seconds + "s";
-        } else if (seconds < 3600) {
-            return Math.round(seconds / 60.0).format("%.0d") + "m";
-        } else {
-            return Math.round(seconds / 3600.0).format("%.0d") + "h";
+        var age = now.subtract(sample.when) as Time.Duration;
+        if (age.lessThan(freshSampleThreshold)) {
+            return "";
         }
-    }
-
-    private function isInsideLabel(
-        coord as [Number, Number],
-        label as Text,
-        justification as TextJustification
-    ) as Boolean {
-        var minX = label.locX;
-        var minY = label.locY;
-        var width = label.width;
-        switch (justification) {
-            case Graphics.TEXT_JUSTIFY_RIGHT: {
-                minX = 0;
-                width = self.width / 2;
-                break;
-            }
-            case Graphics.TEXT_JUSTIFY_VCENTER: {
-                minY = label.locY - label.height / 2;
-                // fallthrough to CENTER case
-            }
-            case Graphics.TEXT_JUSTIFY_CENTER: {
-                minX = 0;
-                width = self.width;
-                break;
-            }
-            case Graphics.TEXT_JUSTIFY_LEFT: {
-                minX = self.width / 2;
-                width = self.width / 2;
-                break;
-            }
-            default: {
-                throw new InvalidValueException("Unexpected justification value: " + justification);
-            }
+        if (age.lessThan(sampleThreshold1)) {
+            return "*";
         }
-        return isInside(
-            coord,
-            minX,
-            minY,
-            width,
-            label.height
-        );
+        if (age.lessThan(sampleThreshold2)) {
+            return "**";
+        }
+        if (age.lessThan(sampleThreshold3)) {
+            return "?";
+        }
+        return "??";
     }
 
     private function isInside(
