@@ -32,8 +32,11 @@ class face1View extends WatchUi.WatchFace {
     var noBluetoothIcon;
 
     var lastHeartRate;
+    var lastHeartRateTime;
     var lastStress;
+    var lastStressTime;
     var lastBodyBattery;
+    var lastBodyBatteryTime;
 
     function initialize() {
         WatchFace.initialize();
@@ -80,13 +83,14 @@ class face1View extends WatchUi.WatchFace {
         var liveHeartrate = activityInfo.currentHeartRate;
         if (liveHeartrate != null) {
             lastHeartRate = liveHeartrate;
+            lastHeartRateTime = now;
             heartrateLabel.setText(liveHeartrate.format("%d"));
         } else {
             var heartRate = SensorHistory.getHeartRateHistory(historyQuery).next();
             if (heartRate != null && heartRate.data != null) {
                 lastHeartRate = heartRate.data;
             }
-            heartrateLabel.setText(historySampleToString(heartRate, now, lastHeartRate));
+            heartrateLabel.setText(historySampleToString(heartRate, now, lastHeartRate, lastHeartRateTime, false));
         }
 
         var stepsStr;
@@ -105,14 +109,14 @@ class face1View extends WatchUi.WatchFace {
             if (stress != null && stress.data != null) {
                 lastStress = stress.data;
             }
-            stressLabel.setText(historySampleToString(stress, now, lastStress));
+            stressLabel.setText(historySampleToString(stress, now, lastStress, lastStressTime, false));
         }
 
         var bodyBattery = SensorHistory.getBodyBatteryHistory(historyQuery).next();
         if (bodyBattery != null && bodyBattery.data != null) {
             lastBodyBattery = bodyBattery.data;
         }
-        bodyBatteryLabel.setText(historySampleToString(bodyBattery, now, lastBodyBattery));
+        bodyBatteryLabel.setText(historySampleToString(bodyBattery, now, lastBodyBattery, lastBodyBatteryTime, true));
 
         batteryLabel.setText(Math.round(System.getSystemStats().battery).format("%02d") + "%");
 
@@ -155,19 +159,27 @@ class face1View extends WatchUi.WatchFace {
         return null;
     }
 
-    private function historySampleToString(sample as SensorHistory.SensorSample?, now as Time.Moment, lastKnownValue) as String {
+    private function historySampleToString(sample as SensorHistory.SensorSample?, now as Time.Moment, lastKnownValue as Number, lastKnownValueTime as Time.Moment, leftJustify as Boolean) as String {
         if (sample == null || sample.data == null) {
             if (lastKnownValue != null) {
-                return lastKnownValue.format("%d") + "~";
+                return addAffix(lastKnownValue.format("%d"), historySampleAgeAffix(lastKnownValueTime, now), leftJustify);
             } else {
-                return "--~";
+                return addAffix("--", "~", leftJustify);
             }
         }
-        return sample.data.format("%d") + historySampleAgeToString(sample, now);
+        return addAffix(sample.data.format("%d"), historySampleAgeAffix(sample.when, now), leftJustify);
     }
 
-    private function historySampleAgeToString(sample as SensorHistory.SensorSample?, now as Time.Moment) as String {
-        var age = now.subtract(sample.when) as Time.Duration;
+    private function addAffix(dataStr as String, ageAffix as String, leftJustify as Boolean) as String {
+        if (leftJustify) {
+            return dataStr + ageAffix;
+        } else {
+            return ageAffix + dataStr;
+        }
+    }
+
+    private function historySampleAgeAffix(timestamp as Time.Moment, now as Time.Moment) as String {
+        var age = now.subtract(timestamp) as Time.Duration;
         if (age.lessThan(freshSampleThreshold)) {
             return "";
         }
