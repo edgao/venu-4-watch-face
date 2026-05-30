@@ -104,13 +104,13 @@ class face1View extends WatchUi.WatchFace {
 
         if (activityMonitorInfo.stressScore != null) {
             lastStress = activityMonitorInfo.stressScore;
-            lastStress = now;
+            lastStressTime = now;
             stressLabel.setText(activityMonitorInfo.stressScore.format("%d"));
         } else {
             var stress = SensorHistory.getStressHistory(historyQuery).next();
             if (stress != null && stress.data != null) {
                 lastStress = stress.data;
-                lastStress = stress.when;
+                lastStressTime = stress.when;
             }
             stressLabel.setText(historySampleToString(stress, now, lastStress, lastStressTime, false));
         }
