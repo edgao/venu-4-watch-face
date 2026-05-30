@@ -89,6 +89,7 @@ class face1View extends WatchUi.WatchFace {
             var heartRate = SensorHistory.getHeartRateHistory(historyQuery).next();
             if (heartRate != null && heartRate.data != null) {
                 lastHeartRate = heartRate.data;
+                lastHeartRateTime = heartRate.when;
             }
             heartrateLabel.setText(historySampleToString(heartRate, now, lastHeartRate, lastHeartRateTime, false));
         }
@@ -103,11 +104,13 @@ class face1View extends WatchUi.WatchFace {
 
         if (activityMonitorInfo.stressScore != null) {
             lastStress = activityMonitorInfo.stressScore;
+            lastStress = now;
             stressLabel.setText(activityMonitorInfo.stressScore.format("%d"));
         } else {
             var stress = SensorHistory.getStressHistory(historyQuery).next();
             if (stress != null && stress.data != null) {
                 lastStress = stress.data;
+                lastStress = stress.when;
             }
             stressLabel.setText(historySampleToString(stress, now, lastStress, lastStressTime, false));
         }
@@ -126,6 +129,7 @@ class face1View extends WatchUi.WatchFace {
         var bodyBattery = SensorHistory.getBodyBatteryHistory(historyQuery).next();
         if (bodyBattery != null && bodyBattery.data != null) {
             lastBodyBattery = bodyBattery.data;
+            lastBodyBatteryTime = now;
         }
         bodyBatteryLabel.setText(historySampleToString(bodyBattery, now, lastBodyBattery, lastBodyBatteryTime, true));
 
