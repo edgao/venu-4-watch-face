@@ -111,6 +111,17 @@ class face1View extends WatchUi.WatchFace {
             }
             stressLabel.setText(historySampleToString(stress, now, lastStress, lastStressTime, false));
         }
+        if (lastStress != null) {
+            if (lastStress <= 25) {
+                stressLabel.setColor(Graphics.COLOR_WHITE);
+            } else if (lastStress <= 50) {
+                stressLabel.setColor(Graphics.COLOR_YELLOW);
+            } else if (lastStress <= 75) {
+                stressLabel.setColor(Graphics.COLOR_ORANGE);
+            } else {
+                stressLabel.setColor(Graphics.COLOR_RED);
+            }
+        }
 
         var bodyBattery = SensorHistory.getBodyBatteryHistory(historyQuery).next();
         if (bodyBattery != null && bodyBattery.data != null) {
