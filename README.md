@@ -13,7 +13,7 @@ Customized watch face for my own needs.
     * if <60s, display with `?`
     * if >=60s, display with `??`
   * If historical sensor data also not available, display last-known value with `~`
-* notification icon
+* notification icon with notification count
 * bluetooth connection-loss icon
 
 # Building/sideloading

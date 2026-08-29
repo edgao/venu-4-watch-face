@@ -29,6 +29,7 @@ class face1View extends WatchUi.WatchFace {
     var bodyBatteryLabel;
     var batteryLabel;
     var notificationIcon;
+    var notificationLabel;
     var noBluetoothIcon;
 
     var lastHeartRate;
@@ -58,6 +59,7 @@ class face1View extends WatchUi.WatchFace {
         batteryLabel = View.findDrawableById("Battery") as Text;
 
         notificationIcon = View.findDrawableById("NotificationIcon") as Bitmap;
+        notificationLabel = View.findDrawableById("NotificationLabel") as Text;
         noBluetoothIcon = View.findDrawableById("NoBluetoothIcon") as Bitmap;
     }
 
@@ -136,7 +138,10 @@ class face1View extends WatchUi.WatchFace {
         batteryLabel.setText(Math.round(System.getSystemStats().battery).format("%02d") + "%");
 
         var deviceSettings = System.getDeviceSettings();
-        notificationIcon.setVisible(deviceSettings.notificationCount > 0);
+        var hasNotifications = deviceSettings.notificationCount > 0;
+        notificationIcon.setVisible(hasNotifications);
+        notificationLabel.setVisible(hasNotifications);
+        notificationLabel.setText(deviceSettings.notificationCount.toString());
         noBluetoothIcon.setVisible(!deviceSettings.phoneConnected);
 
         // Call the parent onUpdate function to redraw the layout
